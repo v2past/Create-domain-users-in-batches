@@ -1,0 +1,60 @@
+Const ForReading = 1
+Const ForWriting = 2
+Const ForAppending = 8
+Dim objShell
+
+'第一层OU，请按照实际情况修改。
+OU1="VDIUserOU"
+
+'第二层OU，请按照实际情况修改，如果没有第二次OU，则将该值设为空，如 OU2=""。
+OU2=""
+
+Attri = Array("-pwd","-fn","-ln","-dept","-office","-title","-email","-tel","-desc")
+
+Set objShell = CreateObject ("WScript.Shell")       
+
+'读写AD域账号的文件，并获得要修改或添加的域账号的数量
+Set objFSO = CreateObject("Scripting.FileSystemObject")
+Set file=objFSO.OpenTextFile("UserList.csv")
+AllADUser=file.readall
+sum=file.Line
+'MsgBox sum,4096,"结果"
+
+
+If sum<=2 Then
+	MsgBox "AD域账号表格为空，请确认账号文件是否存在文件！" ,4096,"结果"
+Else
+	ADUser = Split(AllADUser,vbLf, -1, 1)
+	i=2
+	While i<=sum-1
+   		UserInfo=ADUser(i)
+       		If UserInfo<>"" And UserInfo<>vbCr And UserInfo<>vbLf Then
+		        INfo = Split(UserInfo,",", -1, 1)
+		        ADName=INfo(0)
+		        
+		        For j=1 To 9    
+		        	var=INfo(j)
+		        	If var<>"" And var<>vbCr And var<>vbLf Then
+		           	   str=str & Attri(j-1)&" "&Chr(34)&var&Chr(34)&" "
+		        	End If
+				Next
+				'脚本只支持二层OU的情况，如果OU2为第二层OU，如果OU2为空则表明，只在第一次OU（OU1）中添加域账号。		
+		 		If OU2="" Then
+					runModStr="dsadd user cn="&Chr(34)&ADName&Chr(34)&",ou="&Chr(34)&OU1&Chr(34)&","
+					runModStr=runModStr&"dc=sjzmy,dc=cib,dc=com -upn "&ADName&"@sjzmy.cib.com "
+					runModStr=runModStr&str	
+				Else
+					runModStr="dsadd user cn="&Chr(34)&ADName&Chr(34)&",ou="&Chr(34)&OU2&Chr(34)&",ou="&Chr(34)&OU1&Chr(34)&","
+					runModStr=runModStr&"dc=sjzmy,dc=cib,dc=com  -upn "&ADName&"@sjzmy.cib.com "
+					runModStr=runModStr&str
+				End If
+				'调用WinShell，执行dsadd和dsmod命令。
+				objShell.Run "%Comspec% /c"&runModStr 
+		End If
+		str=""
+		i=i+1
+	Wend
+End If   
+file.Close
+msgbox "您要的文件处理完毕，请查看!",4096 
+wscript.quit 
