@@ -41,11 +41,11 @@ Else
 				'脚本只支持二层OU的情况，如果OU2为第二层OU，如果OU2为空则表明，只在第一次OU（OU1）中添加域账号。		
 		 		If OU2="" Then
 					runModStr="dsadd user cn="&Chr(34)&ADName&Chr(34)&",ou="&Chr(34)&OU1&Chr(34)&","
-					runModStr=runModStr&"dc=sjzmy,dc=cib,dc=com -upn "&ADName&"@sjzmy.cib.com "
+					runModStr=runModStr&"dc=sjzmy,dc=bbb,dc=com -upn "&ADName&"@ddd.bbb.com "
 					runModStr=runModStr&str	
 				Else
 					runModStr="dsadd user cn="&Chr(34)&ADName&Chr(34)&",ou="&Chr(34)&OU2&Chr(34)&",ou="&Chr(34)&OU1&Chr(34)&","
-					runModStr=runModStr&"dc=sjzmy,dc=cib,dc=com  -upn "&ADName&"@sjzmy.cib.com "
+					runModStr=runModStr&"dc=sjzmy,dc=bbb,dc=com  -upn "&ADName&"@ddd.bbb.com "
 					runModStr=runModStr&str
 				End If
 				'调用WinShell，执行dsadd和dsmod命令。
